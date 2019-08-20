@@ -9,8 +9,10 @@ export class InputSnilsMask extends React.Component {
             legend: [],
             blink: false,
             mask: props.mask,
+            updateData: props.updateData,
             digitIndex: [],
         };
+        console.log(props)
     }
 
     componentDidMount() {
@@ -58,12 +60,13 @@ export class InputSnilsMask extends React.Component {
     };
 
     onChange = (event) => {
-        const {digitIndex, mask, value} = this.state;
-        const _v = event.target.value;
-        let v = _v.replace(/\D/g, '').split('');
+        const {digitIndex, mask, value, updateData} = this.state;
+        const inputValue = event.target.value;
+        let pureInputValue = inputValue.replace(/\D/g, '');
+        const pureInputValueArr = pureInputValue.split('');
         let caretPos = event.target.selectionEnd;
         const char = event.nativeEvent.data;
-        let substrIndex = digitIndex[_v.replace(/\D/g, '').length - 1];
+        let substrIndex = digitIndex[pureInputValue.length - 1];
 
         if(char && mask[caretPos - 1] === char){
             substrIndex = caretPos-1;
@@ -72,27 +75,27 @@ export class InputSnilsMask extends React.Component {
             return null
         }
 
-        if (_v.length < value.length && !digitIndex.includes(caretPos)) {
+        if (inputValue.length < value.length && !digitIndex.includes(caretPos)) {
             let deletedPos = 0;
-            let _r = 0;
+            let count = 0;
             digitIndex.forEach((it, i) => {
                 if (caretPos >= it) {
-                    _r = it;
+                    count = it;
                     deletedPos = i;
                 }
             });
-            caretPos = _r;
-            v.splice(deletedPos, 1)
+            caretPos = count;
+            pureInputValueArr.splice(deletedPos, 1)
         }
 
-        const legend = this.getLegend(v);
+        const legend = this.getLegend(pureInputValueArr);
         const _value =legend.join('').substr(0, substrIndex + 1);
-
+        updateData(_value);
         this.setState({
             value: _value,
             legend: legend,
         }, () => {
-            if (_v.length !== caretPos) {
+            if (inputValue.length !== caretPos) {
                 this.inputWrp.querySelector('.maskedInput').setSelectionRange(caretPos, caretPos);
             }
         })
